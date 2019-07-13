@@ -49,6 +49,8 @@ std::string getNextFilename(const std::set<std::string>& record, QStringList nam
     for (int i = 0; i < nameList.size(); ++i)
     {
         std::string name = nameList[i].toStdString();
+        if(name.find("label.jpg") != name.npos)
+            continue;
         if(record.find(name) == record.end())
         {
             return name;

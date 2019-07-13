@@ -89,7 +89,12 @@ void MainWindow::on_actionopen_folder_triggered()
     record_filename = QDir::toNativeSeparators(root_dir + '/' + "record.txt").toStdString();
     label_filename = QDir::toNativeSeparators(root_dir + '/' + "label.txt").toStdString();
     nameList = getDirImageNames(root_dir);
-    totalNums = nameList.size();
+    totalNums = 0;
+    for(int i = 0; i < nameList.size(); ++i)
+    {
+        if(nameList[i].indexOf("label.jpg") == -1)
+            totalNums++;
+    }
     initRecord(record_filename, record);
 
     char message[1000];
@@ -123,6 +128,7 @@ void MainWindow::on_Label_clicked()
 {
     addLabel(label_filename, labImage);
     addRecord(record_filename, record, labImage.name);
+    cv::imwrite(labImage.abs_path + "label.jpg", labImage.image_show);
     char message[1000];
     sprintf(message, "Label save path: %s               total:%d, %d was done!", label_filename.data(), totalNums, record.size());
     QString msg(message);
