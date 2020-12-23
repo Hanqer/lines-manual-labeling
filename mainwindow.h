@@ -31,20 +31,28 @@ private slots:
 
     void on_Next_clicked();
 
+    void on_Prev_clicked();
+
+    void on_Todo_clicked();
+
+    void on_Image_moved();
+
 private:
     Ui::MainWindow *ui;
 
     std::string record_filename;
-    std::string label_filename;
     std::set<std::string> record;
     QString root_dir;
     QStringList nameList;
+    int iterpos;
+    int labeledNums;
     int totalNums;
 
 private:
     LabImage labImage;
     void showImage();
     void updateImage(int x, int y);
+    void showStatus();
 };
 
 #endif // MAINWINDOW_H

@@ -24,9 +24,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11 \
           static
-INCLUDEPATH += /usr/local/include \
-                /usr/local/include/opencv4 \
-                /usr/local/include/opencv4/opencv2
+INCLUDEPATH += D:/work/opencv/opencv/build/include \
+                D:/work/opencv/opencv/build/include/opencv2
 
 #LIBS += /usr/local/lib/libopencv_highgui.a \
 #        /usr/local/lib/libopencv_core.a \
@@ -35,10 +34,7 @@ INCLUDEPATH += /usr/local/include \
 #        /usr/local/lib/libIlmImf.a \
 #        /home/hanqi/opencv/opencv-master/build/3rdparty/lib/libittnotify.a
 #LIBS += -L/usr/lib/x86_64-linux-gnu -lopencv_core -lopencv_highgui -lopencv_imgproc -lz -ldl -ltbb -ltiff -ljpeg -lpng
-LIBS += /usr/local/lib/libopencv_highgui.so \
-        /usr/local/lib/libopencv_core.so \
-        /usr/local/lib/libopencv_imgcodecs.so \
-        /usr/local/lib/libopencv_imgproc.so
+LIBS += D:/work/opencv/opencv/build/x64/vc15/lib/opencv_world411.lib
 
 
 SOURCES += \

@@ -22,6 +22,7 @@ void QLabelEx::mouseDoubleClickEvent(QMouseEvent *ev)
 
 void QLabelEx::mouseMoveEvent(QMouseEvent *ev)
 {
+    pointPos = ev->globalPos();
     emit moved(ev);
 }
 

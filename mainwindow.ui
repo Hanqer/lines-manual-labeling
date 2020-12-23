@@ -6,86 +6,121 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1112</width>
-    <height>669</height>
+    <width>734</width>
+    <height>489</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>manual labeling</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QLabelEx" name="Image">
-    <property name="geometry">
-     <rect>
-      <x>70</x>
-      <y>10</y>
-      <width>971</width>
-      <height>531</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="wordWrap">
-     <bool>false</bool>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="Next">
-    <property name="geometry">
-     <rect>
-      <x>840</x>
-      <y>560</y>
-      <width>101</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Next(right)</string>
-    </property>
-    <property name="shortcut">
-     <string>Right</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="Label">
-    <property name="geometry">
-     <rect>
-      <x>490</x>
-      <y>560</y>
-      <width>101</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Label(Enter)</string>
-    </property>
-    <property name="shortcut">
-     <string>Return</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="Reset">
-    <property name="geometry">
-     <rect>
-      <x>130</x>
-      <y>560</y>
-      <width>111</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Reset(Esc)</string>
-    </property>
-    <property name="shortcut">
-     <string>Esc</string>
-    </property>
-   </widget>
+   <layout class="QGridLayout" name="gridLayout" rowstretch="12,1">
+    <item row="0" column="0">
+     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout" stretch="5,1">
+        <item>
+         <widget class="QLabelEx" name="Image">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="wordWrap">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,0">
+          <property name="spacing">
+           <number>1</number>
+          </property>
+          <property name="sizeConstraint">
+           <enum>QLayout::SetDefaultConstraint</enum>
+          </property>
+          <item>
+           <widget class="QPushButton" name="Todo">
+            <property name="text">
+             <string>To-do</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="Label">
+            <property name="text">
+             <string>Label(Enter)</string>
+            </property>
+            <property name="shortcut">
+             <string>Return</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="TextLabel">
+            <property name="font">
+             <font>
+              <pointsize>14</pointsize>
+             </font>
+            </property>
+            <property name="layoutDirection">
+             <enum>Qt::LeftToRight</enum>
+            </property>
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item row="1" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QPushButton" name="Prev">
+        <property name="text">
+         <string>Previous(left)</string>
+        </property>
+        <property name="shortcut">
+         <string>Left</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="Next">
+        <property name="text">
+         <string>Next(right)</string>
+        </property>
+        <property name="shortcut">
+         <string>Right</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="Reset">
+        <property name="text">
+         <string>Reset(Esc)</string>
+        </property>
+        <property name="shortcut">
+         <string>Esc</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1112</width>
-     <height>28</height>
+     <width>734</width>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menufile">
@@ -107,10 +142,26 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionopen_folder">
    <property name="text">
-    <string>open folder(ctrl+o)</string>
+    <string>open folder(ctrl + o)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionreview_mode">
+   <property name="text">
+    <string>review mode(Ctrl + R)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionlabel_mode">
+   <property name="text">
+    <string>label mode(Ctrl + L)</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
    </property>
   </action>
  </widget>

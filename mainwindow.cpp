@@ -5,6 +5,7 @@
 #include <QString>
 #include <QFileDialog>
 #include <QDebug>
+#include <QString>
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <opencv.hpp>
@@ -48,6 +49,20 @@ void MainWindow::showImage()
     }
 }
 
+void MainWindow::showStatus()
+{
+    std::string msg;
+    char iterMsg[200];
+    char pointMsg[200];
+    sprintf(iterMsg, "%s\n%d / %d\n", labImage.name.data(), iterpos - labeledNums + 1, totalNums);
+    msg += iterMsg;
+    for (int i = 0; i < labImage.lines.size(); ++i) {
+        sprintf(pointMsg, "%d %d %d %d\n", labImage.lines[i].x1, labImage.lines[i].y1, labImage.lines[i].x2, labImage.lines[i].y2);
+        msg += std::string(pointMsg);
+    }
+    ui->TextLabel->setText(QString::fromStdString(msg));
+}
+
 void MainWindow::updateImage(int x=-1, int y=-1)
 {
     if(x < 0 || y < 0)
@@ -87,8 +102,10 @@ void MainWindow::on_actionopen_folder_triggered()
 {
     root_dir = QDir::toNativeSeparators(QFileDialog::getExistingDirectory(this, tr("path"), QDir::currentPath()));
     record_filename = QDir::toNativeSeparators(root_dir + '/' + "record.txt").toStdString();
-    label_filename = QDir::toNativeSeparators(root_dir + '/' + "label.txt").toStdString();
+//    label_filename = QDir::toNativeSeparators(root_dir + '/' + "label.txt").toStdString();
     nameList = getDirImageNames(root_dir);
+    iterpos = 0;
+    labeledNums = 0;
     totalNums = 0;
     for(int i = 0; i < nameList.size(); ++i)
     {
@@ -97,13 +114,34 @@ void MainWindow::on_actionopen_folder_triggered()
     }
     initRecord(record_filename, record);
 
-    char message[1000];
-    sprintf(message, "Label save path: %s               total:%d, %d was done!", label_filename.data(), totalNums, record.size());
-    QString msg(message);
-    ui->statusBar->showMessage(msg);
+    std::string filename = getFirstFilename(nameList);
+    if(filename == "")
+    {
+        QMessageBox msgBox;
+        msgBox.setText("No images.");
+        msgBox.exec();
+    }
+    else
+    {
+        labImage.name = filename;
+        labImage.abs_path = QDir::toNativeSeparators(root_dir + '/' + QString::fromStdString(filename)).toStdString();
+        labImage.needDraw = 0;
+        labImage.lines.clear();
+        if (record.find(filename) != record.end())
+        {
+            labImage.image_show = cv::imread(labImage.abs_path + "label.jpg");
+            loadImageLabel(labImage);
+        }
+        else
+        {
+            labImage.image_show = cv::imread(labImage.abs_path);
+            labImage.num_semantic_lines = 0;
+        }
 
-    on_Next_clicked();
 
+        showImage();
+        showStatus();
+    }
 }
 
 void MainWindow::on_Image_clicked()
@@ -115,50 +153,144 @@ void MainWindow::on_Image_clicked()
     updateImage(transX, transY);
 }
 
-void MainWindow::on_Reset_clicked()
+void MainWindow::on_Image_moved()
 {
+    QPoint pos = ui->Image->pointPos;
+    pos = ui->Image->mapFromGlobal(pos);
+    int transX = pos.x() - ui->Image->xoffset;
+    int transY = pos.y() - ui->Image->yoffset;
+    cv::Mat imgs = labImage.image_show.clone();
+    qDebug() << "moved";
+    if(labImage.needDraw)
+    {
+        cv::circle(imgs, cv::Point(transX, transY), 5, cv::Scalar(0, 0, 255), 4);
+        cv::line(imgs, cv::Point(transX, transY), labImage.pre_point, cv::Scalar(0, 255, 255), 2);
+        //labImage.num_semantic_lines++;
+        //labImage.lines.push_back(mLine(transX, transY, labImage.pre_point.x, labImage.pre_point.y));
+        //labImage.needDraw = false;
+        cv::Mat rgb;
+        QImage img;
+        if(imgs.channels() == 3)
+        {
+            cv::cvtColor(imgs, rgb, cv::COLOR_BGR2RGB);
+            img = QImage(const_cast<unsigned char*>(rgb.data), rgb.cols, rgb.rows, rgb.cols*rgb.channels(), QImage::Format_RGB888);
+        }
+        else
+        {
+            img = QImage(const_cast<unsigned char*>(imgs.data), imgs.cols, imgs.rows, imgs.cols*imgs.channels(), QImage::Format_RGB888);
+        }
+        ui->Image->setPixmap(QPixmap::fromImage(img));
+        ui->Image->setAlignment(Qt::AlignCenter);
+        ui->Image->setOffset();
+    }
+}
+
+void MainWindow::on_Reset_clicked()
+{   
     labImage.image_show = cv::imread(labImage.abs_path);
     labImage.num_semantic_lines = 0;
     labImage.needDraw = 0;
     labImage.lines.clear();
+    addLabel(labImage);
+    cv::imwrite(labImage.abs_path + "label.jpg", labImage.image_show);
+    qDebug() << "debug: " << record_filename.data() << " " << labImage.name.data();
+    eraseRecord(record_filename, labImage.name);
+    qDebug() << "ok this line run";
     showImage();
+    showStatus();
 }
 
 void MainWindow::on_Label_clicked()
 {
-    addLabel(label_filename, labImage);
+    addLabel(labImage);
     addRecord(record_filename, record, labImage.name);
     cv::imwrite(labImage.abs_path + "label.jpg", labImage.image_show);
     char message[1000];
-    sprintf(message, "Label save path: %s               total:%d, %d was done!", label_filename.data(), totalNums, record.size());
+    sprintf(message, "Label save done, iamge: %s               total:%d, %d was done!", labImage.abs_path.data(), totalNums, record.size());
     QString msg(message);
     ui->statusBar->showMessage(msg);
-    ui->Label->setDisabled(true);
-    ui->Reset->setDisabled(true);
+    showStatus();
+    on_Next_clicked();
 }
 
 void MainWindow::on_Next_clicked()
-{
-    std::string filename = getNextFilename(record, nameList);
-    if(filename == "")
-    {
-        QMessageBox msgBox;
-        msgBox.setText("All image labels are completed.");
-        msgBox.exec();
-    }
-    else
+{   
+    std::string filename = getNextFilename(nameList, iterpos, labeledNums);
+
+    if (filename != "")
     {
         labImage.name = filename;
         labImage.abs_path = QDir::toNativeSeparators(root_dir + '/' + QString::fromStdString(filename)).toStdString();
-        labImage.image_show = cv::imread(labImage.abs_path);
-        labImage.num_semantic_lines = 0;
         labImage.needDraw = 0;
         labImage.lines.clear();
-
+        if (record.find(filename) != record.end())
+        {
+            labImage.image_show = cv::imread(labImage.abs_path + "label.jpg");
+            loadImageLabel(labImage);
+        }
+        else
+        {
+            labImage.image_show = cv::imread(labImage.abs_path);
+            labImage.num_semantic_lines = 0;
+        }
         showImage();
+        showStatus();
+    }
+}
 
-        ui->Label->setDisabled(false);
-        ui->Reset->setDisabled(false);
+
+void MainWindow::on_Prev_clicked()
+{
+    std::string filename = getPrevFilename(nameList, iterpos, labeledNums);
+    if (filename != "")
+    {
+        labImage.name = filename;
+        labImage.abs_path = QDir::toNativeSeparators(root_dir + '/' + QString::fromStdString(filename)).toStdString();
+        labImage.needDraw = 0;
+        labImage.lines.clear();
+        if (record.find(filename) != record.end())
+        {
+            labImage.image_show = cv::imread(labImage.abs_path + "label.jpg");
+            loadImageLabel(labImage);
+        }
+        else
+        {
+            labImage.image_show = cv::imread(labImage.abs_path);
+            labImage.num_semantic_lines = 0;
+        }
+        showImage();
+        showStatus();
     }
 
 }
+
+void MainWindow::on_Todo_clicked()
+{
+    std::string filename = getCurrFilename(nameList, record, iterpos, labeledNums);
+    if (filename != "")
+    {
+        labImage.name = filename;
+        labImage.abs_path = QDir::toNativeSeparators(root_dir + '/' + QString::fromStdString(filename)).toStdString();
+        labImage.needDraw = 0;
+        labImage.lines.clear();
+        if (record.find(filename) != record.end())
+        {
+            labImage.image_show = cv::imread(labImage.abs_path + "label.jpg");
+            loadImageLabel(labImage);
+        }
+        else
+        {
+            labImage.image_show = cv::imread(labImage.abs_path);
+            labImage.num_semantic_lines = 0;
+        }
+        showImage();
+        showStatus();
+    }
+    else {
+        QMessageBox msgBox;
+        msgBox.setText("All iamge labeled done.");
+        msgBox.exec();
+    }
+}
+
+
